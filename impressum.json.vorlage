@@ -1,0 +1,10 @@
+{
+  "_hinweis": "Kopiere diese Datei nach 'impressum.json' und trage deine echten Angaben ein. Ohne sie wird keine Impressumsseite erzeugt und der Menuepunkt erscheint nicht.",
+  "name": "Vorname Nachname",
+  "strasse": "Musterstraße 1",
+  "ort": "12345 Musterstadt",
+  "land": "Deutschland",
+  "email": "kontakt@example.de",
+  "telefon": "",
+  "umsatzsteuerId": ""
+}
