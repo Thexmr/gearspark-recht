@@ -67,11 +67,11 @@ const seite = (titel, inhalt, aktiv) => `<!doctype html>
 <html lang="de"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${titel} — GEARSPARK</title>
+<title>${titel} — GearsparkX</title>
 <meta name="description" content="${titel} der App GEARSPARK.">
 <style>${STIL}</style>
 </head><body>
-<header><h1>GEARSPARK</h1><p>Videoeffekte für Beyblade-Aufnahmen</p></header>
+<header><h1>GearsparkX</h1><p>Videoeffekte für Aufnahmen von Kampfkreiseln</p></header>
 <nav>
   <a href="./" ${aktiv === "start" ? 'aria-current="page"' : ""}>Übersicht</a>
   <a href="./datenschutz.html" ${aktiv === "datenschutz" ? 'aria-current="page"' : ""}>Datenschutz</a>
@@ -81,9 +81,9 @@ const seite = (titel, inhalt, aktiv) => `<!doctype html>
 </nav>
 <main>${inhalt}</main>
 <footer>
-  <p>GEARSPARK · Fassung der Rechtstexte ${RECHT_FASSUNG}${impressum ? ` · <a href="./impressum.html">Impressum</a>` : ""}</p>
-  <p>Beyblade und zugehörige Namen sind Marken ihrer jeweiligen Inhaber.
-     GEARSPARK steht mit ihnen in keiner Verbindung.</p>
+  <p>GearsparkX · Fassung der Rechtstexte ${RECHT_FASSUNG}${impressum ? ` · <a href="./impressum.html">Impressum</a>` : ""}</p>
+  <p>GearsparkX ist ein eigenständiges Werkzeug und steht mit keinem Hersteller
+     von Spielzeugkreiseln in Verbindung.</p>
 </footer>
 </body></html>`;
 
@@ -109,9 +109,9 @@ const dateien = {
   "index.html": seite(
     "Übersicht",
     `<article>
-      <h2>Rechtliche Hinweise zu GEARSPARK</h2>
+      <h2>Rechtliche Hinweise zu GearsparkX</h2>
       <p class="stand">Fassung ${RECHT_FASSUNG}</p>
-      <p>GEARSPARK versieht deine eigenen Videoaufnahmen mit Effekten. Analyse und
+      <p>GearsparkX versieht deine eigenen Videoaufnahmen mit Effekten. Analyse und
       Rendering laufen vollständig auf deinem Gerät — es gibt keinen Server, auf den
       Aufnahmen hochgeladen werden.</p>
       <p>Auf diesen Seiten findest du die <a href="./datenschutz.html">Datenschutzerklärung</a>,
