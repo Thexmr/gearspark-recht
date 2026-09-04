@@ -15,7 +15,7 @@
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { WARNUNG_EPILEPSIE, DATENSCHUTZ, AGB, RECHT_FASSUNG } from "../../frontend/src/recht.js";
+import { WARNUNG_EPILEPSIE, DATENSCHUTZ, AGB, IMPRESSUM, RECHT_FASSUNG } from "../../frontend/src/recht.js";
 
 const hier = dirname(fileURLToPath(import.meta.url));
 const ziel = join(hier, "..", "docs");
@@ -67,11 +67,11 @@ const seite = (titel, inhalt, aktiv) => `<!doctype html>
 <html lang="de"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${titel} — GearsparkX</title>
+<title>${titel} — Gearspark</title>
 <meta name="description" content="${titel} der App GEARSPARK.">
 <style>${STIL}</style>
 </head><body>
-<header><h1>GearsparkX</h1><p>Videoeffekte für Aufnahmen von Kampfkreiseln</p></header>
+<header><h1>Gearspark</h1><p>Videoeffekte für Aufnahmen von Kampfkreiseln</p></header>
 <nav>
   <a href="./" ${aktiv === "start" ? 'aria-current="page"' : ""}>Übersicht</a>
   <a href="./datenschutz.html" ${aktiv === "datenschutz" ? 'aria-current="page"' : ""}>Datenschutz</a>
@@ -81,8 +81,8 @@ const seite = (titel, inhalt, aktiv) => `<!doctype html>
 </nav>
 <main>${inhalt}</main>
 <footer>
-  <p>GearsparkX · Fassung der Rechtstexte ${RECHT_FASSUNG}${impressum ? ` · <a href="./impressum.html">Impressum</a>` : ""}</p>
-  <p>GearsparkX ist ein eigenständiges Werkzeug und steht mit keinem Hersteller
+  <p>Gearspark · Fassung der Rechtstexte ${RECHT_FASSUNG}${impressum ? ` · <a href="./impressum.html">Impressum</a>` : ""}</p>
+  <p>Gearspark ist ein eigenständiges Werkzeug und steht mit keinem Hersteller
      von Spielzeugkreiseln in Verbindung.</p>
 </footer>
 </body></html>`;
@@ -100,18 +100,24 @@ const seite = (titel, inhalt, aktiv) => `<!doctype html>
  * entfaellt. Ein Impressum mit Platzhaltern waere schlechter als keines — es
  * saehe fertig aus und waere doch falsch.
  */
-const impressumPfad = join(hier, "..", "impressum.json");
-const impressum = existsSync(impressumPfad)
-  ? JSON.parse(readFileSync(impressumPfad, "utf8"))
-  : null;
+// Das Impressum kommt aus denselben Texten wie alles andere.
+//
+// Frueher stand es in einer eigenen `impressum.json`, die bewusst nicht
+// mitversioniert wurde — es sind Privatanschrift und Kontaktdaten. Der
+// Gedanke war richtig und traegt trotzdem nicht: Sobald das Impressum auch
+// in der App steht, und dort muss es stehen, liegt die Anschrift ohnehin in
+// jedem ausgelieferten Paket. Zwei Quellen haetten nur den einen Effekt
+// gehabt, den dieses Skript verhindern soll — dass im Netz etwas anderes
+// steht als in der App.
+const impressum = IMPRESSUM;
 
 const dateien = {
   "index.html": seite(
     "Übersicht",
     `<article>
-      <h2>Rechtliche Hinweise zu GearsparkX</h2>
+      <h2>Rechtliche Hinweise zu Gearspark</h2>
       <p class="stand">Fassung ${RECHT_FASSUNG}</p>
-      <p>GearsparkX versieht deine eigenen Videoaufnahmen mit Effekten. Analyse und
+      <p>Gearspark versieht deine eigenen Videoaufnahmen mit Effekten. Analyse und
       Rendering laufen vollständig auf deinem Gerät — es gibt keinen Server, auf den
       Aufnahmen hochgeladen werden.</p>
       <p>Auf diesen Seiten findest du die <a href="./datenschutz.html">Datenschutzerklärung</a>,
@@ -143,25 +149,13 @@ const dateien = {
   ),
 };
 
-if (impressum) {
-  const zeile = (bezeichnung, wert) =>
-    wert ? `<p><strong>${bezeichnung}</strong><br>${wert}</p>` : "";
-  dateien["impressum.html"] = seite(
-    "Impressum",
-    `<article><h2>Impressum</h2>
-      <p class="stand">Angaben gemäß § 5 DDG</p>
-      ${zeile("Anbieter", impressum.name)}
-      ${zeile("Anschrift", [impressum.strasse, impressum.ort, impressum.land].filter(Boolean).join("<br>"))}
-      ${zeile("E-Mail", impressum.email ? `<a href="mailto:${impressum.email}">${impressum.email}</a>` : "")}
-      ${zeile("Telefon", impressum.telefon)}
-      ${zeile("Umsatzsteuer-Identifikationsnummer", impressum.umsatzsteuerId)}
-      <p>Verantwortlich für den Inhalt: ${impressum.name}</p>
-    </article>`,
-    "impressum",
-  );
-} else {
-  console.log("Hinweis: impressum.json fehlt — die Impressumsseite entfaellt.");
-}
+dateien["impressum.html"] = seite(
+  IMPRESSUM.titel,
+  `<article><h2>${IMPRESSUM.titel}</h2>
+    <p class="stand">Angaben gemäß § 5 DDG</p>
+    ${absaetze(IMPRESSUM.text)}</article>`,
+  "impressum",
+);
 
 for (const [name, inhalt] of Object.entries(dateien)) {
   writeFileSync(join(ziel, name), inhalt);
