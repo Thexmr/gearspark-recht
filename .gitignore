@@ -2,3 +2,5 @@
 # Sie gehoeren nicht in ein oeffentliches Repository — die erzeugte Seite
 # unter docs/ traegt sie ohnehin dorthin, wo sie hin muessen.
 impressum.json
+
+.DS_Store
