@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Open Source und Quelltext — Gearspark</title>
+<meta name="description" content="Open Source und Quelltext der App GEARSPARK.">
+<style>
+:root{--grund:#0b0e18;--karte:#141827;--text:#eceaf4;--matt:#9a9ab4;--lila:#9858ff;--rand:rgba(255,255,255,.09)}
+*{box-sizing:border-box}
+body{margin:0;padding:0;background:var(--grund);color:var(--text);
+  font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:38px 20px 30px;text-align:center;border-bottom:1px solid var(--rand)}
+header h1{margin:0 0 6px;font-size:26px;letter-spacing:.01em}
+header p{margin:0;color:var(--matt);font-size:14px}
+nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:18px 20px 0}
+nav a{padding:8px 14px;border:1px solid var(--rand);border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:13px;font-weight:600}
+nav a:hover{border-color:var(--lila)}
+nav a[aria-current]{background:var(--lila);border-color:var(--lila);color:#fff}
+main{max-width:760px;margin:0 auto;padding:26px 20px 70px}
+article{background:var(--karte);border:1px solid var(--rand);border-radius:14px;padding:26px 24px}
+article h2{margin:0 0 4px;font-size:20px}
+.stand{margin:0 0 20px;color:var(--matt);font-size:13px}
+p{margin:0 0 14px}
+strong{color:#fff}
+.warnung{border-color:rgba(255,180,60,.35);background:rgba(255,170,40,.07)}
+.warnung h2{color:#ffd37a}
+footer{max-width:760px;margin:0 auto;padding:0 20px 50px;color:var(--matt);font-size:12px;line-height:1.7}
+footer a{color:var(--lila)}
+@media (prefers-color-scheme:light){
+  :root{--grund:#f6f6fa;--karte:#fff;--text:#16161d;--matt:#5c5c72;--rand:rgba(0,0,0,.10)}
+  strong{color:#000}
+}
+</style>
+</head><body>
+<header><h1>Gearspark</h1><p>Videoeffekte für Aufnahmen von Kampfkreiseln</p></header>
+<nav>
+  <a href="./" >Übersicht</a>
+  <a href="./datenschutz.html" >Datenschutz</a>
+  <a href="./nutzungsbedingungen.html" >Nutzungsbedingungen</a>
+  <a href="./warnhinweis.html" >Warnhinweis</a>
+  <a href="./konto-loeschen.html" >Konto löschen</a>
+  <a href="./quelltext.html" aria-current="page">Open Source</a>
+  <a href="./impressum.html" >Impressum</a>
+</nav>
+<main><article><h2>Open Source und Quelltext</h2>
+    <p class="stand">FFmpeg und x264 · GNU General Public License, Version 3</p>
+    <p>GEARSPARK enthält Software anderer Urheber. Wir danken allen, die sie geschrieben haben.</p>
+<p><strong>FFmpeg und x264</strong><br>Zum Lesen und Schreiben von Videos startet die App die eigenständigen Programme FFmpeg (Version 7.1) und x264. Beide stehen unter der GNU General Public License, Version 3. Du darfst sie nach den Bedingungen dieser Lizenz verwenden, weitergeben und verändern; sie kommen ohne jede Gewährleistung.</p>
+<p>Den vollständigen Quelltext dieser beiden Programme samt Bauanleitung findest du unter https://thexmr.github.io/gearspark-recht/quelltext.html. Auf Anfrage an die Adresse im Impressum schicken wir ihn dir auch zu — für mindestens drei Jahre ab deinem Download der App.</p>
+    <p><strong>Quelltext</strong></p>
+    <p>FFmpeg 7.1, unverändert: <a href="https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz">ffmpeg.org/releases/ffmpeg-7.1.tar.xz</a><br>
+    x264, Zweig „stable“, unverändert: <a href="https://code.videolan.org/videolan/x264/-/tree/stable">code.videolan.org/videolan/x264</a></p>
+    <p>Beide Programme werden ohne eigene Änderungen am Quelltext gebaut. Sollten die Adressen oben einmal nicht erreichbar sein, schicken wir dir den Quelltext auf Anfrage an die Adresse im <a href="./impressum.html">Impressum</a>.</p>
+    <p><strong>Lizenz</strong></p>
+    <p>GNU General Public License, Version 3: <a href="https://www.gnu.org/licenses/gpl-3.0.txt">gnu.org/licenses/gpl-3.0.txt</a>. Der vollständige Text liegt auch in der App unter Einstellungen → Open-Source-Lizenzen.</p>
+    <p><strong>Bauanleitung</strong></p>
+    <p>Mit diesem Skript entstehen die ausgelieferten Programme (Android NDK 27, arm64):</p>
+    <pre style="overflow:auto;padding:14px;border:1px solid var(--rand);border-radius:10px;font-size:12px;line-height:1.5">#!/bin/bash
+# Baut ffmpeg und ffprobe fuer Android (arm64) und legt sie so ab, dass die
+# App sie mitliefern kann.
+#
+# Warum ueberhaupt: die gesamte Medienstrecke von GEARSPARK ruft ffmpeg als
+# Programm auf. Auf dem Schreibtisch ist es installiert, auf einem Telefon
+# nicht — und nachinstallieren kann der Nutzer dort nichts. Also kommt es mit
+# in die App.
+#
+# Warum als `lib*.so`: seit Android 10 darf eine App nur noch Programme
+# ausfuehren, die im Bibliotheksordner des Pakets liegen. Dorthin gelangt eine
+# Datei ausschliesslich, wenn sie wie eine Bibliothek heisst.
+set -euo pipefail
+
+HIER="$(cd "$(dirname "$0")" &amp;&amp; pwd)"
+BAU="$HIER/bau"
+ZIEL="$HIER/../../app/gen/android/app/src/main/jniLibs/arm64-v8a"
+API=26
+
+: "${ANDROID_HOME:?ANDROID_HOME fehlt — zuerst 'source code/android-env.sh'}"
+NDK="${NDK_HOME:-$ANDROID_HOME/ndk/$(ls "$ANDROID_HOME/ndk" | sort -V | tail -1)}"
+WERKZEUG="$NDK/toolchains/llvm/prebuilt/darwin-x86_64"
+[ -d "$WERKZEUG" ] || WERKZEUG="$NDK/toolchains/llvm/prebuilt/$(ls "$NDK/toolchains/llvm/prebuilt" | head -1)"
+
+export PATH="$WERKZEUG/bin:$PATH"
+export CC="aarch64-linux-android$API-clang"
+export CXX="aarch64-linux-android$API-clang++"
+export AR="llvm-ar" RANLIB="llvm-ranlib" STRIP="llvm-strip" NM="llvm-nm"
+
+PREFIX="$BAU/prefix"
+# ffmpeg fragt pkg-config nach x264. Ohne diese beiden Variablen sucht
+# pkg-config in den Systemordnern des Macs und findet dort natuerlich nur
+# Bibliotheken fuer macOS — die Fehlermeldung lautet dann irrefuehrend
+# "x264 not found".
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig"
+mkdir -p "$BAU" "$PREFIX"
+cd "$BAU"
+
+X264_VER=stable
+FFMPEG_VER=7.1
+
+# 16-KB-Speicherseiten: Google Play verlangt sie seit November 2025 fuer Apps
+# mit Ziel Android 15+. Das NDK richtet erst ab r28 von selbst so aus; die
+# Angabe `-z max-page-size=16384` bei den Linker-Schaltern unten erzwingt es
+# auch mit r27. Am Ende prueft `seitengroesse-pruefen.py` das Ergebnis.
+
+# --- x264 --------------------------------------------------------------------
+if [ ! -f "$PREFIX/lib/libx264.a" ]; then
+  echo "== x264 wird geholt und gebaut =="
+  [ -d x264 ] || git clone --depth 1 --branch "$X264_VER" https://code.videolan.org/videolan/x264.git
+  cd x264
+  ./configure \
+    --prefix="$PREFIX" \
+    --host=aarch64-linux-android \
+    --cross-prefix="$WERKZEUG/bin/llvm-" \
+    --sysroot="$WERKZEUG/sysroot" \
+    --enable-static --enable-pic \
+    --disable-cli --disable-opencl --disable-asm
+  make -j"$(sysctl -n hw.ncpu 2>/dev/null || nproc)"
+  make install
+  cd "$BAU"
+fi
+
+# --- ffmpeg ------------------------------------------------------------------
+echo "== ffmpeg wird geholt und gebaut =="
+if [ ! -d "ffmpeg-$FFMPEG_VER" ]; then
+  curl -L -o "ffmpeg-$FFMPEG_VER.tar.xz" "https://ffmpeg.org/releases/ffmpeg-$FFMPEG_VER.tar.xz"
+  tar xf "ffmpeg-$FFMPEG_VER.tar.xz"
+fi
+cd "ffmpeg-$FFMPEG_VER"
+
+if [ ! -f ffmpeg ]; then
+  ./configure \
+    --prefix="$PREFIX" \
+    --target-os=android --arch=aarch64 --enable-cross-compile \
+    --cc="$CC" --cxx="$CXX" --ar="$WERKZEUG/bin/llvm-ar" \
+    --ranlib="$WERKZEUG/bin/llvm-ranlib" --strip="$WERKZEUG/bin/llvm-strip" \
+    --nm="$WERKZEUG/bin/llvm-nm" \
+    --sysroot="$WERKZEUG/sysroot" \
+    --extra-cflags="-I$PREFIX/include -O2 -fPIC" \
+    --extra-ldflags="-L$PREFIX/lib -static-libstdc++ -Wl,-z,max-page-size=16384" \
+    --extra-ldexeflags=-pie \
+    --pkg-config-flags=--static \
+    --enable-gpl --enable-version3 --enable-libx264 \
+    --enable-static --disable-shared \
+    --enable-pic \
+    --disable-doc --disable-ffplay --disable-debug --disable-symver \
+    --enable-protocol=file,pipe --enable-filter=all \
+    --enable-decoder=h264,hevc,vp8,vp9,aac,mp3,pcm_s16le,flac,vorbis,opus,png,mjpeg \
+    --enable-encoder=libx264,aac,pcm_s16le,png,rawvideo \
+    --enable-demuxer=mov,matroska,avi,mp3,wav,flac,ogg,image2,rawvideo \
+    --enable-muxer=mp4,mov,matroska,mp3,wav,image2,rawvideo,null \
+    --enable-parser=h264,hevc,aac,vp9,png
+  make -j"$(sysctl -n hw.ncpu 2>/dev/null || nproc)"
+fi
+
+mkdir -p "$ZIEL"
+cp ffmpeg "$ZIEL/libffmpeg.so"
+cp ffprobe "$ZIEL/libffprobe.so"
+"$WERKZEUG/bin/llvm-strip" "$ZIEL/libffmpeg.so" "$ZIEL/libffprobe.so" || true
+chmod +x "$ZIEL/libffmpeg.so" "$ZIEL/libffprobe.so"
+
+python3 "$HIER/../../produkte/seitengroesse-pruefen.py" "$ZIEL"
+
+echo
+echo "== fertig =="
+ls -la "$ZIEL"
+file "$ZIEL/libffmpeg.so" 2>/dev/null || true
+</pre>
+  </article></main>
+<footer>
+  <p>Gearspark · Fassung der Rechtstexte 3 · <a href="./impressum.html">Impressum</a></p>
+  <p>Gearspark ist ein eigenständiges Werkzeug und steht mit keinem Hersteller
+     von Spielzeugkreiseln in Verbindung.</p>
+</footer>
+</body></html>

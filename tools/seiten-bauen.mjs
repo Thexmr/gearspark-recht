@@ -15,7 +15,14 @@
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { WARNUNG_EPILEPSIE, DATENSCHUTZ, AGB, IMPRESSUM, RECHT_FASSUNG } from "../../frontend/src/recht.js";
+import { WARNUNG_EPILEPSIE, DATENSCHUTZ, AGB, IMPRESSUM, RECHT_FASSUNG, KONTO_LOESCHEN, LIZENZEN_TEXT } from "../../frontend/src/recht.js";
+
+// Das Bauskript fuer FFmpeg und x264 gehoert nach der GPL zum Quelltext.
+// Es liegt im App-Repository; fehlt es beim Bauen der Seiten, bleibt der
+// Abschnitt leer statt falsch.
+const BAUSKRIPT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "code", "tools", "android-ffmpeg", "bauen.sh");
+const bauskript = existsSync(BAUSKRIPT) ? readFileSync(BAUSKRIPT, "utf8") : "";
+const roh = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
 const hier = dirname(fileURLToPath(import.meta.url));
 const ziel = join(hier, "..", "docs");
@@ -77,6 +84,8 @@ const seite = (titel, inhalt, aktiv) => `<!doctype html>
   <a href="./datenschutz.html" ${aktiv === "datenschutz" ? 'aria-current="page"' : ""}>Datenschutz</a>
   <a href="./nutzungsbedingungen.html" ${aktiv === "agb" ? 'aria-current="page"' : ""}>Nutzungsbedingungen</a>
   <a href="./warnhinweis.html" ${aktiv === "warnung" ? 'aria-current="page"' : ""}>Warnhinweis</a>
+  <a href="./konto-loeschen.html" ${aktiv === "loeschen" ? 'aria-current="page"' : ""}>Konto löschen</a>
+  <a href="./quelltext.html" ${aktiv === "quelltext" ? 'aria-current="page"' : ""}>Open Source</a>
   ${impressum ? `<a href="./impressum.html" ${aktiv === "impressum" ? 'aria-current="page"' : ""}>Impressum</a>` : ""}
 </nav>
 <main>${inhalt}</main>
@@ -124,6 +133,8 @@ const dateien = {
       die <a href="./nutzungsbedingungen.html">Nutzungsbedingungen</a> und den
       <a href="./warnhinweis.html">Warnhinweis zu Blitzen und flackernden Effekten</a>.
       Dieselben Texte stehen in der App unter Einstellungen.</p>
+      <p>Außerdem: <a href="./konto-loeschen.html">Konto und Daten löschen</a> und
+      <a href="./quelltext.html">Open Source und Quelltext</a>.</p>
     </article>`,
     "start",
   ),
@@ -148,6 +159,32 @@ const dateien = {
     "warnung",
   ),
 };
+
+dateien["konto-loeschen.html"] = seite(
+  KONTO_LOESCHEN.titel,
+  `<article><h2>${KONTO_LOESCHEN.titel}</h2>
+    <p class="stand">Gearspark · Fassung ${RECHT_FASSUNG}</p>
+    ${absaetze(KONTO_LOESCHEN.text)}</article>`,
+  "loeschen",
+);
+
+dateien["quelltext.html"] = seite(
+  "Open Source und Quelltext",
+  `<article><h2>Open Source und Quelltext</h2>
+    <p class="stand">FFmpeg und x264 · GNU General Public License, Version 3</p>
+    ${absaetze(LIZENZEN_TEXT.de.replace(/\n\n\*\*Weitere Bibliotheken\*\*[\s\S]*$/, ""))}
+    <p><strong>Quelltext</strong></p>
+    <p>FFmpeg 7.1, unverändert: <a href="https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz">ffmpeg.org/releases/ffmpeg-7.1.tar.xz</a><br>
+    x264, Zweig „stable“, unverändert: <a href="https://code.videolan.org/videolan/x264/-/tree/stable">code.videolan.org/videolan/x264</a></p>
+    <p>Beide Programme werden ohne eigene Änderungen am Quelltext gebaut. Sollten die Adressen oben einmal nicht erreichbar sein, schicken wir dir den Quelltext auf Anfrage an die Adresse im <a href="./impressum.html">Impressum</a>.</p>
+    <p><strong>Lizenz</strong></p>
+    <p>GNU General Public License, Version 3: <a href="https://www.gnu.org/licenses/gpl-3.0.txt">gnu.org/licenses/gpl-3.0.txt</a>. Der vollständige Text liegt auch in der App unter Einstellungen → Open-Source-Lizenzen.</p>
+    ${bauskript ? `<p><strong>Bauanleitung</strong></p>
+    <p>Mit diesem Skript entstehen die ausgelieferten Programme (Android NDK 27, arm64):</p>
+    <pre style="overflow:auto;padding:14px;border:1px solid var(--rand);border-radius:10px;font-size:12px;line-height:1.5">${roh(bauskript)}</pre>` : ""}
+  </article>`,
+  "quelltext",
+);
 
 dateien["impressum.html"] = seite(
   IMPRESSUM.titel,
